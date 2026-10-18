@@ -16,6 +16,14 @@ Die Startskripte benötigen Python 3 und stellen ausschließlich statische Datei
 
 ## Als mobile PWA verwenden
 
+### Automatisch mit GitHub Pages
+
+Der Workflow `.github/workflows/pages.yml` baut Änderungen auf `main` und veröffentlicht ausschließlich den Inhalt von `dist/` über GitHub Pages. Er lässt sich auch unter **Actions → Publish Belegwerk to GitHub Pages → Run workflow** starten. Im Repository muss unter **Settings → Pages → Build and deployment → Source** die Option **GitHub Actions** aktiviert sein; der Workflow versucht, Pages bei der ersten Ausführung automatisch einzurichten, soweit Berechtigungen und GitHub-Tarif dies erlauben. Die bestätigte Adresse erscheint im Deployment und in den Pages-Einstellungen.
+
+Auf Android diese Adresse in Chrome öffnen, auf **„Offline bereit“** warten und im Chrome-Menü **„App installieren“** beziehungsweise **„Zum Startbildschirm hinzufügen“** wählen. Die veröffentlichte App enthält keine persönlichen Belege; diese bleiben lokal oder in der verbundenen Ablage.
+
+### Eigenes HTTPS-Hosting
+
 1. Den **Inhalt von `dist/`** auf einer vertrauenswürdigen HTTPS-Adresse bereitstellen, auch in einem Unterordner möglich. Es ist kein Anwendungsserver nötig.
 2. Diese Adresse am Smartphone öffnen und auf **„Offline bereit“** warten. Sämtliche Bibliotheken und deutsche OCR-Sprachdaten werden lokal vorgehalten.
 3. Android/Chromium: „App installieren“. iPhone/iPad: Teilen → Zum Home-Bildschirm.
