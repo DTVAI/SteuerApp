@@ -1,0 +1,8 @@
+# Beispiel für Projektdatei <projekt>/.codex/config.toml
+# Der Installer legt sie nur an, wenn keine Projektkonfiguration existiert.
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 2
+# Optional bei bestätigtem Zugang:
+# default_subagent_model = "gpt-6-luna"
+# default_subagent_reasoning_effort = "high"
