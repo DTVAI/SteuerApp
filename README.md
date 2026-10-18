@@ -1,70 +1,55 @@
-# SteuerApp – Codex Skills und Agenten
+# Belegwerk PWA
 
-Dieses Repository enthält das projektlokale Codex PWA Agent Studio aus dem bereitgestellten Paket v1.0. Anwendungscode ist noch nicht vorhanden.
+**Öffnen → Foto machen oder Datei hinzufügen → „Auf diesem Gerät gespeichert“ abwarten → schließen.**
 
-## Start
+Belegwerk übernimmt danach Texterkennung, Vorschläge für Datum/Betrag/Aussteller/Kategorie und die geordnete Ablage. Offene Arbeit bleibt in einer dauerhaften Warteschlange. Die App enthält keine Chatoberfläche und benötigt keinen Ollama- oder anderen lokalen Analyse-Server.
 
-1. Dieses Repository in Codex als Projekt öffnen, im Terminal beispielsweise `cd /workspace/SteuerApp` und `codex`.
-2. Falls Codex fragt, das eigene Projekt als vertrauenswürdig bestätigen. Projektkonfigurationen werden je nach Client erst für vertrauenswürdige Projekte geladen.
-3. Nach Änderungen an Skills oder Agenten eine neue Sitzung starten bzw. das Projekt neu öffnen.
-4. Einen Skill ausdrücklich mit `$skill-name` ansprechen oder eine passende Aufgabe beschreiben. `AGENTS.md` enthält die Projektregeln zur gezielten Auswahl.
+## Sofort ausprobieren
 
-Beispiele für Nachrichten an Codex:
+Nach dem Klonen oder Herunterladen dieses GitHub-Repositorys zunächst `node scripts/build.mjs` ausführen (Node.js 20+, keine Paketinstallation). Dadurch entsteht der fertige statische Build unter `dist/`. Ein vorbereitetes PWA-Paket kann diesen Build bereits enthalten. Danach das passende Startskript ausführen:
 
-```text
-$capability-delegator Untersuche dieses Repository und plane die nächsten Schritte.
-Nutze bei Bedarf maximal zwei Agenten parallel. Noch nichts implementieren.
+- macOS: `Belegwerk starten (Mac).command` (gegebenenfalls Rechtsklick → Öffnen).
+- Windows: `Belegwerk starten (Windows).bat`.
+- Linux: `bash start.sh`.
+
+Die Startskripte benötigen Python 3 und stellen ausschließlich statische Dateien unter `http://localhost:8765/` bereit. Sie sind für die lokale Vorschau auf diesem Rechner gedacht. Derselbe Browser, dieselbe Adresse und derselbe Port greifen auf dieselben lokalen Belege zu.
+
+## Als mobile PWA verwenden
+
+1. Den **Inhalt von `dist/`** auf einer vertrauenswürdigen HTTPS-Adresse bereitstellen, auch in einem Unterordner möglich. Es ist kein Anwendungsserver nötig.
+2. Diese Adresse am Smartphone öffnen und auf **„Offline bereit“** warten. Sämtliche Bibliotheken und deutsche OCR-Sprachdaten werden lokal vorgehalten.
+3. Android/Chromium: „App installieren“. iPhone/iPad: Teilen → Zum Home-Bildschirm.
+4. Optional in den Einstellungen Dropbox oder einen unterstützten Ordner verbinden. [Ablage einrichten](docs/storage-setup.md).
+5. Foto aufnehmen oder Datei wählen. Die Erfolgsmeldung bestätigt den dauerhaften lokalen Commit; „Extern abgelegt“ bestätigt die spätere Ablage.
+
+Dateien: PDF, Fotos einschließlich HEIC (browserabhängig), Word, Excel, CSV, Text, HTML, E-Mail und ZIP. Unklare Erkennung ist als **„Zu prüfen“** markiert; Angaben lassen sich im Beleg korrigieren. Steuerliche Zuordnungen sind Vorschläge.
+
+## Suche
+
+Volltextsuche über erkannte Inhalte, Original- und Ablagenamen, Aussteller, Belegart, Kategorie, Notizen, Schlagwörter, Betrag und Datum. Mit Wortanfängen, Umlautnormalisierung, Tippfehlertoleranz, Treffertexten und Filtern.
+
+Beispiele: `Müller`, `129,90`, `jahr:2025 betrag>100`, `"Rechnungsnummer"`, `von:2025-01 bis:2025-06`, `#Fortbildung`. Treffer lassen sich als geordnetes ZIP exportieren. In den Einstellungen gibt es zusätzlich eine vollständige Sicherung mit Originalen.
+
+## Hintergrundverarbeitung
+
+OCR läuft im Web Worker einer geöffneten App. Das Betriebssystem kann sie nach dem Schließen oder beim Hintergrundwechsel anhalten. **Eine reine PWA garantiert insbesondere auf iOS keine dauerhaft laufende Hintergrund-OCR.** Die Originale und Aufträge sind vorher gespeichert und werden beim nächsten Öffnen automatisch weiterverarbeitet.
+
+Bereits verarbeitete Uploadaufträge können über einen Service Worker und Background Sync weiterlaufen, soweit Browser, Rechte und Dropbox-Sitzung dies erlauben. Andernfalls werden sie ebenfalls beim nächsten Öffnen fortgesetzt. Dropbox benötigt einmalig eine eigene App-Folder-App mit öffentlichem App-Key. Kurzlebige Sitzungen müssen nach Ablauf erneut verbunden werden; keine langfristigen Refresh-Tokens liegen im Browser. Details: [Speicheranbindung und Grenzen](docs/storage-setup.md).
+
+## Entwicklung und Prüfung
+
+```sh
+node scripts/build.mjs
+python3 -m http.server 8765 --bind 127.0.0.1 --directory dist
 ```
 
-```text
-$pwa-app-shell Prüfe Manifest, Service Worker und Offline-Kaltstart.
+Build: Node.js 20 oder neuer, keine Paketinstallation. Der Build generiert die Cache-Version aus den tatsächlich ausgelieferten Dateien und stellt das Deployment-Verzeichnis zusammen. Nach Codeänderungen erneut bauen. Vorhandene Belegwerk-Daten auf derselben Origin werden aus IndexedDB v1 nach v2 übernommen.
+
+```sh
+node --test tests/pipeline.test.mjs tests/cloud.test.mjs
+node --test tests/app.test.mjs
 ```
 
-```text
-$privacy-security-review Prüfe den Umgang mit personenbezogenen Steuerdaten.
-```
+Die ersten Tests benötigen Node.js 22+ (WebSocket) und Chromium. Die App-Prüfung verwendet zusätzlich ein vorhandenes Playwright; hier ist es vorinstalliert. Abweichenden Chromium-Pfad über `CHROMIUM` setzen. Die Tests führen keine echten Dropbox-Uploads aus. Die vollständige Appprüfung umfasst echte Offline-OCR, persistente Browserprofile, einen kompletten Browser-Neustart und 320–430-px-Layouts.
 
-```text
-Nutze den Agenten code_explorer für eine Bestandsaufnahme und qa_reviewer
-für eine unabhängige Testprüfung. Berichte die Ergebnisse mit Dateibelegen.
-```
-
-Ein leerer Projektstand erlaubt zunächst nur Planung; die Beispiele setzen für konkrete App-Prüfungen Anwendungscode voraus.
-
-## Skills
-
-Die neun Skills liegen in `.agents/skills/<name>/SKILL.md`:
-
-| Name | Aufgabe |
-| --- | --- |
-| capability-delegator | Aufgaben einschätzen und gezielt delegieren |
-| pwa-app-shell | Manifest, Service Worker und Offline-Start |
-| offline-first-data | Lokale Datenhaltung, Synchronisation und Konflikte |
-| capacitor-mobile | iOS-/Android-Integration mit Capacitor |
-| mobile-ui-craft | Mobile Oberfläche und Barrierefreiheit |
-| react-performance | Performance bei React-/Next-Projekten |
-| pwa-quality-gates | Offline-, Plattform- und Regressionstests |
-| local-backend-migration | Abhängigkeiten von lokalen Servern untersuchen |
-| privacy-security-review | Datenschutz und sichere Speicherung |
-
-## Agenten
-
-Die sieben Rollen liegen in `.codex/agents/`:
-
-- `code_explorer`: Bestandsaufnahme
-- `offline_architect`: Offline- und Datenarchitektur
-- `mobile_integrator`: Native Integration
-- `ui_specialist`: Oberfläche und Bedienbarkeit
-- `implementation_worker`: Klar abgegrenzte Implementierung
-- `qa_reviewer`: Tests und Regressionen
-- `privacy_reviewer`: Datenschutz und Sicherheit
-
-`.codex/config.toml` aktiviert Agenten mit maximal zwei gleichzeitigen Subagenten. Es werden keine Modelle fest vorgegeben. Kleine Aufgaben bearbeitet der Hauptagent allein; das Ablegen einer Rolle startet noch keinen Agenten. Tatsächliche Rollenerkennung und Delegation hängen vom verwendeten Codex-Client ab. Die Dateien ändern die Konfiguration einer bereits laufenden Chatsitzung nicht rückwirkend.
-
-## Prüfung und Herkunft
-
-Vor der Installation bestanden die statische Paketprüfung und alle sechs mitgelieferten Unittests. Nach der Installation wurden neun Skill-Dateien, sieben TOML-Rollen und die TOML-Konfiguration geprüft. Codex CLI 0.159.2 meldete im Konfigurationscheck `config loaded`; ein tatsächlicher Start der Rollen wurde nicht getestet. Der allgemeine Doctor meldete außerdem eingeschränkte Provider-Erreichbarkeit in dieser Umgebung.
-
-Die Skills und Rollen sind Teil dieses Repositorys. Eine neue Codex-Sitzung benötigt einen Checkout des Branches, der diese Dateien enthält. Bei lokalen Änderungen müssen auch die versteckten Verzeichnisse `.agents` und `.codex` committed und zum Remote-Repository gepusht werden, bevor ein frischer GitHub-Checkout sie enthält.
-
-Herkunft, Lizenz und weitere Prompt-Beispiele stehen unter `docs/codex/`. Die Inhalte des ZIPs wurden als Installationsmaterial behandelt, nicht als Auftrag zur App-Entwicklung oder zum Start zusätzlicher Agenten.
+Architektur: [docs/architecture.md](docs/architecture.md). Ergebnisbericht: [docs/refactor-report.md](docs/refactor-report.md). Repository-Anweisungen und Skills bleiben unter `AGENTS.md`, `.agents/skills/`, `.codex/` und [docs/codex](docs/codex/README.md) erhalten.
