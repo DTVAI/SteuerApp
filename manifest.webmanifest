@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "Belegwerk",
+  "short_name": "Belegwerk",
+  "description": "Belege erfassen, automatisch ordnen und schnell wiederfinden.",
+  "lang": "de",
+  "start_url": "./#capture",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f6f1",
+  "theme_color": "#145950",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Beleg erfassen", "url": "./#capture" },
+    { "name": "Belege suchen", "url": "./#library" }
+  ]
+}
